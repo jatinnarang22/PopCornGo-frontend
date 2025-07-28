@@ -149,21 +149,49 @@ const Home: React.FC = () => {
                 </div>
               </div>
             </div>
-            <Link
-              to="/profile"
-              style={{
-                backgroundColor: '#dc2626',
-                color: 'white',
-                padding: '8px 24px',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                fontSize: '14px',
-                fontWeight: '500',
-                transition: 'background-color 0.2s'
-              }}
-            >
-              Sign In
-            </Link>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Link
+                to="/signin"
+                style={{
+                  backgroundColor: 'white',
+                  color: '#dc2626',
+                  padding: '8px 20px',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  border: '1px solid #dc2626',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor = '#dc2626';
+                  e.currentTarget.style.color = 'white';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.color = '#dc2626';
+                }}
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                style={{
+                  backgroundColor: '#dc2626',
+                  color: 'white',
+                  padding: '8px 20px',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#b91c1c'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#dc2626'}
+              >
+                Sign Up
+              </Link>
+            </div>
           </div>
         </div>
       </section>

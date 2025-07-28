@@ -114,7 +114,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
           ₹{price} onwards
         </span>
         <Link 
-          to="/movies" 
+          to="/booking" 
           style={{
             backgroundColor: '#dc2626',
             color: 'white',
@@ -125,8 +125,10 @@ const MovieCard: React.FC<MovieCardProps> = ({
             fontWeight: '500',
             transition: 'background-color 0.2s'
           }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#b91c1c'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#dc2626'}
         >
-          Book
+          Book Now
         </Link>
       </div>
     </div>
