@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import MovieCard, { MovieCardProps } from '../cards/MovieCard';
+import MovieCard, { type MovieCardProps } from '../cards/MovieCard';
 
 interface MoviesSectionProps {
   movies: MovieCardProps[];

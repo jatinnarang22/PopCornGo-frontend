@@ -1,6 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import MovieCard, { type MovieCardProps } from '../components/cards/MovieCard';
 
 interface FilterOptions {
   genre: string;
@@ -12,6 +11,8 @@ interface FilterOptions {
 const Movies: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('Mumbai');
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [filters, setFilters] = useState<FilterOptions>({
     genre: 'All',
     language: 'All',
@@ -19,169 +20,122 @@ const Movies: React.FC = () => {
     priceRange: 'All'
   });
 
-  const cities = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune'];
-  
-  const genres = ['All', 'Action', 'Comedy', 'Drama', 'Horror', 'Romance', 'Sci-Fi', 'Thriller', 'Adventure'];
-  const languages = ['All', 'English', 'Hindi', 'Tamil', 'Telugu', 'Marathi', 'Bengali'];
-  const formats = ['All', '2D', '3D', 'IMAX', '4DX'];
-  const priceRanges = ['All', 'Under ₹150', '₹150-₹250', '₹250-₹350', 'Above ₹350'];
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const allMovies: MovieCardProps[] = [
+  // Dark mode theme colors
+  const theme = {
+    bg: {
+      primary: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%)',
+      secondary: 'rgba(15, 15, 35, 0.95)',
+      glass: 'rgba(255, 255, 255, 0.05)',
+      card: 'rgba(255, 255, 255, 0.08)',
+      hover: 'rgba(255, 255, 255, 0.12)'
+    },
+    text: {
+      primary: '#ffffff',
+      secondary: 'rgba(255, 255, 255, 0.8)',
+      muted: 'rgba(255, 255, 255, 0.6)'
+    },
+    accent: {
+      primary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      secondary: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      tertiary: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+    },
+    border: 'rgba(255, 255, 255, 0.1)'
+  };
+
+  // Sample movie data
+  const moviesData = [
     {
+      id: 1,
       title: 'Avengers: Endgame',
-      genre: 'Action, Adventure, Drama',
+      genre: 'Action',
+      language: 'English',
+      format: 'IMAX',
       rating: 8.4,
-      image: 'https://images.unsplash.com/photo-1489599904472-c2269952b9e4?w=400&h=600&fit=crop',
-      price: 150,
-      language: 'English, Hindi',
-      format: '2D, 3D, IMAX'
+      duration: '181 min',
+      image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop',
+      price: '₹350'
     },
     {
+      id: 2,
       title: 'Spider-Man: No Way Home',
-      genre: 'Action, Adventure, Sci-Fi',
-      rating: 8.7,
-      image: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&h=600&fit=crop',
-      price: 180,
-      language: 'English, Hindi',
-      format: '2D, 3D, IMAX'
+      genre: 'Action',
+      language: 'English',
+      format: '4DX',
+      rating: 8.2,
+      duration: '148 min',
+      image: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=300&h=450&fit=crop',
+      price: '₹400'
     },
     {
+      id: 3,
       title: 'The Batman',
-      genre: 'Action, Crime, Drama',
+      genre: 'Action',
+      language: 'English',
+      format: 'Dolby Atmos',
       rating: 7.8,
-      image: 'https://images.unsplash.com/photo-1608889476561-6242cfdbf622?w=400&h=600&fit=crop',
-      price: 200,
-      language: 'English, Hindi',
-      format: '2D, IMAX'
+      duration: '176 min',
+      image: 'https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=300&h=450&fit=crop',
+      price: '₹320'
     },
     {
-      title: 'Top Gun: Maverick',
-      genre: 'Action, Drama',
-      rating: 8.3,
-      image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop',
-      price: 170,
-      language: 'English, Hindi',
-      format: '2D, IMAX'
-    },
-    {
+      id: 4,
       title: 'Dune',
-      genre: 'Sci-Fi, Adventure, Drama',
+      genre: 'Sci-Fi',
+      language: 'English',
+      format: 'IMAX',
       rating: 8.0,
-      image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop',
-      price: 160,
-      language: 'English, Hindi',
-      format: '2D, IMAX'
+      duration: '155 min',
+      image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=300&h=450&fit=crop',
+      price: '₹380'
     },
     {
-      title: 'Black Widow',
-      genre: 'Action, Adventure, Thriller',
-      rating: 6.7,
-      image: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=600&fit=crop',
-      price: 140,
-      language: 'English, Hindi',
-      format: '2D, 3D'
+      id: 5,
+      title: 'Top Gun: Maverick',
+      genre: 'Action',
+      language: 'English',
+      format: '4DX',
+      rating: 8.3,
+      duration: '130 min',
+      image: 'https://images.unsplash.com/photo-1574267432553-4b4628081c31?w=300&h=450&fit=crop',
+      price: '₹420'
     },
     {
-      title: 'Fast & Furious 9',
-      genre: 'Action, Crime, Thriller',
-      rating: 5.2,
-      image: 'https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&h=600&fit=crop',
-      price: 130,
-      language: 'English, Hindi',
-      format: '2D, 3D'
-    },
-    {
-      title: 'Eternals',
-      genre: 'Action, Adventure, Drama',
-      rating: 6.3,
-      image: 'https://images.unsplash.com/photo-1635863138275-d9864d3e8e2f?w=400&h=600&fit=crop',
-      price: 190,
-      language: 'English, Hindi, Tamil',
-      format: '2D, 3D, IMAX'
-    },
-    {
-      title: 'No Time to Die',
-      genre: 'Action, Adventure, Thriller',
-      rating: 7.3,
-      image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=600&fit=crop',
-      price: 175,
-      language: 'English, Hindi',
-      format: '2D, IMAX'
-    },
-    {
-      title: 'Shang-Chi',
-      genre: 'Action, Adventure, Fantasy',
-      rating: 7.4,
-      image: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=600&fit=crop',
-      price: 165,
-      language: 'English, Hindi',
-      format: '2D, 3D, IMAX'
-    },
-    {
-      title: 'Venom: Let There Be Carnage',
-      genre: 'Action, Sci-Fi, Thriller',
-      rating: 5.9,
-      image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=600&fit=crop',
-      price: 155,
-      language: 'English, Hindi',
-      format: '2D, 3D'
-    },
-    {
-      title: 'The Matrix Resurrections',
-      genre: 'Action, Sci-Fi',
-      rating: 5.7,
-      image: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=400&h=600&fit=crop',
-      price: 185,
-      language: 'English, Hindi',
-      format: '2D, IMAX'
+      id: 6,
+      title: 'RRR',
+      genre: 'Action',
+      language: 'Telugu',
+      format: 'Dolby Atmos',
+      rating: 7.9,
+      duration: '187 min',
+      image: 'https://images.unsplash.com/photo-1489599856040-b6c906d1b4b8?w=300&h=450&fit=crop',
+      price: '₹280'
     }
   ];
 
   // Filter movies based on search and filters
   const filteredMovies = useMemo(() => {
-    return allMovies.filter(movie => {
-      // Search filter
-      const matchesSearch = movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           movie.genre.toLowerCase().includes(searchQuery.toLowerCase());
+    return moviesData.filter(movie => {
+      const matchesSearch = movie.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesGenre = filters.genre === 'All' || movie.genre === filters.genre;
+      const matchesLanguage = filters.language === 'All' || movie.language === filters.language;
+      const matchesFormat = filters.format === 'All' || movie.format === filters.format;
       
-      // Genre filter
-      const matchesGenre = filters.genre === 'All' || movie.genre.includes(filters.genre);
-      
-      // Language filter
-      const matchesLanguage = filters.language === 'All' || movie.language.includes(filters.language);
-      
-      // Format filter
-      const matchesFormat = filters.format === 'All' || movie.format.includes(filters.format);
-      
-      // Price range filter
-      let matchesPrice = true;
-      if (filters.priceRange !== 'All') {
-        switch (filters.priceRange) {
-          case 'Under ₹150':
-            matchesPrice = movie.price < 150;
-            break;
-          case '₹150-₹250':
-            matchesPrice = movie.price >= 150 && movie.price <= 250;
-            break;
-          case '₹250-₹350':
-            matchesPrice = movie.price >= 250 && movie.price <= 350;
-            break;
-          case 'Above ₹350':
-            matchesPrice = movie.price > 350;
-            break;
-        }
-      }
-      
-      return matchesSearch && matchesGenre && matchesLanguage && matchesFormat && matchesPrice;
+      return matchesSearch && matchesGenre && matchesLanguage && matchesFormat;
     });
-  }, [allMovies, searchQuery, filters]);
+  }, [searchQuery, filters, moviesData]);
 
-  const handleFilterChange = (filterType: keyof FilterOptions, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
-  };
+  const cities = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Hyderabad'];
+  const genres = ['All', 'Action', 'Comedy', 'Drama', 'Horror', 'Romance', 'Sci-Fi', 'Thriller'];
+  const languages = ['All', 'English', 'Hindi', 'Telugu', 'Tamil', 'Malayalam'];
+  const formats = ['All', 'IMAX', '4DX', 'Dolby Atmos', '3D', '2D'];
 
   const clearAllFilters = () => {
     setFilters({
@@ -194,306 +148,571 @@ const Movies: React.FC = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
-      {/* Header Section */}
-      <section style={{
-        backgroundColor: 'white',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        borderBottom: '1px solid #e5e7eb',
-        position: 'sticky',
+    <div style={{
+      minHeight: '100vh',
+      background: theme.bg.primary,
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Animated Background Elements */}
+      <div style={{
+        position: 'fixed',
         top: 0,
-        zIndex: 10
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: 0
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px' }}>
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              width: '200px',
+              height: '200px',
+              borderRadius: '50%',
+              background: `linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))`,
+              animation: `float ${6 + i}s ease-in-out infinite`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              transform: `translate(-50%, -50%)`,
+              filter: 'blur(40px)'
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Fixed Header */}
+      <header style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        background: isScrolled ? theme.bg.secondary : 'transparent',
+        backdropFilter: isScrolled ? 'blur(20px)' : 'none',
+        borderBottom: isScrolled ? `1px solid ${theme.border}` : 'none',
+        transition: 'all 0.3s ease',
+        padding: '16px 0'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          {/* Logo */}
+          <Link to="/" style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            background: theme.accent.primary,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textDecoration: 'none'
+          }}>
+            PopcornGo
+          </Link>
+
+          {/* Search Bar - Desktop */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '16px 0'
+            gap: '16px',
+            flex: 1,
+            maxWidth: '600px',
+            margin: '0 32px'
           }}>
-            {/* Logo/Back */}
-            <Link to="/" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              textDecoration: 'none',
-              color: '#dc2626',
-              fontWeight: 'bold',
-              fontSize: '18px'
-            }}>
-              ← PopcornGo
-            </Link>
-            
-            {/* City Selector */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#6b7280', fontSize: '14px' }}>📍</span>
-              <select
-                value={selectedCity}
-                onChange={e => setSelectedCity(e.target.value)}
+            <div style={{ position: 'relative', flex: 1 }}>
+              <input
+                type="text"
+                placeholder="Search for movies..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  padding: '8px 12px',
-                  fontSize: '14px',
+                  width: '100%',
+                  padding: '12px 16px 12px 48px',
+                  border: `1px solid ${theme.border}`,
+                  borderRadius: '12px',
+                  background: theme.bg.glass,
+                  backdropFilter: 'blur(10px)',
+                  color: theme.text.primary,
+                  fontSize: '16px',
                   outline: 'none',
-                  cursor: 'pointer'
+                  transition: 'all 0.3s ease'
                 }}
-              >
-                {cities.map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
+              />
+              <div style={{
+                position: 'absolute',
+                left: '16px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: theme.text.muted,
+                fontSize: '20px'
+              }}>
+                🔍
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Page Title & Search */}
-      <section style={{ padding: '32px 0', backgroundColor: 'white' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px' }}>
-          <h1 style={{
-            fontSize: '36px',
-            fontWeight: 'bold',
-            color: '#111827',
-            marginBottom: '24px',
-            textAlign: 'center'
-          }}>
-            Movies in {selectedCity}
-          </h1>
-          
-          {/* Search Bar */}
-          <div style={{ maxWidth: '600px', margin: '0 auto', position: 'relative' }}>
-            <input
-              type="text"
-              placeholder="Search movies by title or genre..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+            {/* City Selector */}
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
               style={{
-                width: '100%',
-                padding: '16px 20px 16px 50px',
-                border: '2px solid #e5e7eb',
+                padding: '12px 16px',
+                border: `1px solid ${theme.border}`,
                 borderRadius: '12px',
+                background: theme.bg.glass,
+                backdropFilter: 'blur(10px)',
+                color: theme.text.primary,
                 fontSize: '16px',
                 outline: 'none',
-                transition: 'border-color 0.2s'
-              }}
-              onFocus={e => e.target.style.borderColor = '#dc2626'}
-              onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-            />
-            <div style={{
-              position: 'absolute',
-              left: '16px',
-              top: '18px',
-              color: '#9ca3af',
-              fontSize: '20px'
-            }}>
-              🔍
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Filters Section */}
-      <section style={{ padding: '24px 0', backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '16px'
-          }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>Filters</h3>
-            <button
-              onClick={clearAllFilters}
-              style={{
-                backgroundColor: 'transparent',
-                color: '#dc2626',
-                border: '1px solid #dc2626',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = '#dc2626';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#dc2626';
+                cursor: 'pointer'
               }}
             >
-              Clear All
-            </button>
+              {cities.map(city => (
+                <option key={city} value={city} style={{ background: '#1a1a2e', color: '#ffffff' }}>
+                  {city}
+                </option>
+              ))}
+            </select>
           </div>
-          
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px'
-          }}>
-            {/* Genre Filter */}
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Genre
-              </label>
-              <select
-                value={filters.genre}
-                onChange={e => handleFilterChange('genre', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                {genres.map(genre => (
-                  <option key={genre} value={genre}>{genre}</option>
-                ))}
-              </select>
-            </div>
+
+          {/* Dark Mode Toggle & Auth */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              style={{
+                padding: '8px',
+                border: 'none',
+                borderRadius: '8px',
+                background: theme.bg.glass,
+                color: theme.text.primary,
+                cursor: 'pointer',
+                fontSize: '20px',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
             
-            {/* Language Filter */}
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Language
-              </label>
-              <select
-                value={filters.language}
-                onChange={e => handleFilterChange('language', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                {languages.map(language => (
-                  <option key={language} value={language}>{language}</option>
-                ))}
-              </select>
-            </div>
-            
-            {/* Format Filter */}
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Format
-              </label>
-              <select
-                value={filters.format}
-                onChange={e => handleFilterChange('format', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                {formats.map(format => (
-                  <option key={format} value={format}>{format}</option>
-                ))}
-              </select>
-            </div>
-            
-            {/* Price Range Filter */}
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Price Range
-              </label>
-              <select
-                value={filters.priceRange}
-                onChange={e => handleFilterChange('priceRange', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                {priceRanges.map(range => (
-                  <option key={range} value={range}>{range}</option>
-                ))}
-              </select>
-            </div>
+            <Link to="/signin" style={{
+              padding: '10px 20px',
+              background: theme.accent.primary,
+              color: 'white',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              fontWeight: '500',
+              transition: 'all 0.3s ease'
+            }}>
+              Sign In
+            </Link>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Results Section */}
-      <section style={{ padding: '32px 0' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '24px'
-          }}>
-            <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827' }}>
-              {filteredMovies.length} Movies Found
-            </h2>
-            <div style={{ fontSize: '14px', color: '#6b7280' }}>
-              Showing results for {selectedCity}
+      {/* Main Content */}
+      <main style={{ paddingTop: '100px', position: 'relative', zIndex: 1 }}>
+        {/* Page Title */}
+        <section style={{ padding: '40px 0 20px' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+            <h1 style={{
+              fontSize: '48px',
+              fontWeight: 'bold',
+              background: theme.accent.primary,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textAlign: 'center',
+              marginBottom: '16px',
+              textShadow: '0 4px 20px rgba(102, 126, 234, 0.3)'
+            }}>
+              Now Showing
+            </h1>
+            <p style={{
+              fontSize: '18px',
+              color: theme.text.secondary,
+              textAlign: 'center',
+              maxWidth: '600px',
+              margin: '0 auto'
+            }}>
+              Discover the latest blockbusters and indie gems playing in {selectedCity}
+            </p>
+          </div>
+        </section>
+
+        {/* Filters Section */}
+        <section style={{ padding: '20px 0' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+            <div style={{
+              background: theme.bg.glass,
+              backdropFilter: 'blur(20px)',
+              borderRadius: '16px',
+              padding: '24px',
+              border: `1px solid ${theme.border}`,
+              marginBottom: '32px'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '20px'
+              }}>
+                <h3 style={{
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: theme.text.primary,
+                  margin: 0
+                }}>
+                  Filters
+                </h3>
+                <button
+                  onClick={clearAllFilters}
+                  style={{
+                    padding: '8px 16px',
+                    background: theme.accent.secondary,
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  Clear All
+                </button>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '16px'
+              }}>
+                {/* Genre Filter */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    color: theme.text.secondary,
+                    marginBottom: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}>
+                    Genre
+                  </label>
+                  <select
+                    value={filters.genre}
+                    onChange={(e) => setFilters(prev => ({ ...prev, genre: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${theme.border}`,
+                      borderRadius: '8px',
+                      background: theme.bg.card,
+                      color: theme.text.primary,
+                      fontSize: '14px',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {genres.map(genre => (
+                      <option key={genre} value={genre} style={{ background: '#1a1a2e', color: '#ffffff' }}>
+                        {genre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Language Filter */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    color: theme.text.secondary,
+                    marginBottom: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}>
+                    Language
+                  </label>
+                  <select
+                    value={filters.language}
+                    onChange={(e) => setFilters(prev => ({ ...prev, language: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${theme.border}`,
+                      borderRadius: '8px',
+                      background: theme.bg.card,
+                      color: theme.text.primary,
+                      fontSize: '14px',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {languages.map(language => (
+                      <option key={language} value={language} style={{ background: '#1a1a2e', color: '#ffffff' }}>
+                        {language}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Format Filter */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    color: theme.text.secondary,
+                    marginBottom: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}>
+                    Format
+                  </label>
+                  <select
+                    value={filters.format}
+                    onChange={(e) => setFilters(prev => ({ ...prev, format: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${theme.border}`,
+                      borderRadius: '8px',
+                      background: theme.bg.card,
+                      color: theme.text.primary,
+                      fontSize: '14px',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {formats.map(format => (
+                      <option key={format} value={format} style={{ background: '#1a1a2e', color: '#ffffff' }}>
+                        {format}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
-          
-          {filteredMovies.length > 0 ? (
+        </section>
+
+        {/* Movies Grid */}
+        <section style={{ padding: '20px 0 60px' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '24px'
+            }}>
+              <h2 style={{
+                fontSize: '24px',
+                fontWeight: '600',
+                color: theme.text.primary,
+                margin: 0
+              }}>
+                {filteredMovies.length} Movies Found
+              </h2>
+            </div>
+
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
               gap: '24px'
             }}>
-              {filteredMovies.map((movie, index) => (
-                <MovieCard key={index} {...movie} />
+              {filteredMovies.map(movie => (
+                <div
+                  key={movie.id}
+                  style={{
+                    background: theme.bg.glass,
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    border: `1px solid ${theme.border}`,
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    transform: 'translateY(0)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-8px)';
+                    e.currentTarget.style.background = theme.bg.hover;
+                    e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.background = theme.bg.glass;
+                    e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.2)';
+                  }}
+                >
+                  <div style={{ position: 'relative' }}>
+                    <img
+                      src={movie.image}
+                      alt={movie.title}
+                      style={{
+                        width: '100%',
+                        height: '300px',
+                        objectFit: 'cover'
+                      }}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      top: '12px',
+                      right: '12px',
+                      background: 'rgba(0, 0, 0, 0.7)',
+                      color: '#fbbf24',
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      ⭐ {movie.rating}
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '20px' }}>
+                    <h3 style={{
+                      fontSize: '18px',
+                      fontWeight: '600',
+                      color: theme.text.primary,
+                      marginBottom: '8px',
+                      lineHeight: '1.4'
+                    }}>
+                      {movie.title}
+                    </h3>
+
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                      marginBottom: '16px'
+                    }}>
+                      <span style={{
+                        background: theme.accent.primary,
+                        color: 'white',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        fontWeight: '500'
+                      }}>
+                        {movie.genre}
+                      </span>
+                      <span style={{
+                        background: theme.bg.card,
+                        color: theme.text.secondary,
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        border: `1px solid ${theme.border}`
+                      }}>
+                        {movie.language}
+                      </span>
+                      <span style={{
+                        background: theme.bg.card,
+                        color: theme.text.secondary,
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        border: `1px solid ${theme.border}`
+                      }}>
+                        {movie.format}
+                      </span>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '16px'
+                    }}>
+                      <span style={{
+                        color: theme.text.secondary,
+                        fontSize: '14px'
+                      }}>
+                        {movie.duration}
+                      </span>
+                      <span style={{
+                        color: theme.text.primary,
+                        fontSize: '16px',
+                        fontWeight: '600'
+                      }}>
+                        {movie.price}
+                      </span>
+                    </div>
+
+                    <Link
+                      to={`/booking/${movie.id}`}
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        padding: '12px',
+                        background: theme.accent.primary,
+                        color: 'white',
+                        textDecoration: 'none',
+                        borderRadius: '8px',
+                        textAlign: 'center',
+                        fontWeight: '600',
+                        fontSize: '14px',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.02)';
+                        e.currentTarget.style.boxShadow = '0 4px 20px rgba(102, 126, 234, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      Book Now
+                    </Link>
+                  </div>
+                </div>
               ))}
             </div>
-          ) : (
-            <div style={{
-              textAlign: 'center',
-              padding: '64px 16px',
-              color: '#6b7280'
-            }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎬</div>
-              <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
-                No movies found
-              </h3>
-              <p style={{ fontSize: '16px', marginBottom: '24px' }}>
-                Try adjusting your search or filters to find more movies.
-              </p>
-              <button
-                onClick={clearAllFilters}
-                style={{
-                  backgroundColor: '#dc2626',
-                  color: 'white',
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#b91c1c'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#dc2626'}
-              >
-                Clear All Filters
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
+
+            {filteredMovies.length === 0 && (
+              <div style={{
+                textAlign: 'center',
+                padding: '60px 20px',
+                color: theme.text.secondary
+              }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎬</div>
+                <h3 style={{
+                  fontSize: '24px',
+                  color: theme.text.primary,
+                  marginBottom: '8px'
+                }}>
+                  No movies found
+                </h3>
+                <p style={{ fontSize: '16px' }}>
+                  Try adjusting your search or filters to find more movies.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translate(-50%, -50%) translateY(0px) rotate(0deg); }
+          50% { transform: translate(-50%, -50%) translateY(-20px) rotate(180deg); }
+        }
+
+        @media (max-width: 768px) {
+          .mobile-hidden { display: none !important; }
+          .mobile-search { display: block !important; }
+        }
+
+        @media (min-width: 769px) {
+          .mobile-search { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import EventCard, { type EventCardProps } from '../components/cards/EventCard';
 
@@ -12,12 +12,44 @@ interface EventFilterOptions {
 const Events: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('Mumbai');
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [filters, setFilters] = useState<EventFilterOptions>({
     category: 'All',
     city: 'All',
     priceRange: 'All',
     date: 'All'
   });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Dark mode theme colors
+  const theme = {
+    bg: {
+      primary: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%)',
+      secondary: 'rgba(15, 15, 35, 0.95)',
+      glass: 'rgba(255, 255, 255, 0.05)',
+      card: 'rgba(255, 255, 255, 0.08)',
+      hover: 'rgba(255, 255, 255, 0.12)'
+    },
+    text: {
+      primary: '#ffffff',
+      secondary: 'rgba(255, 255, 255, 0.8)',
+      muted: 'rgba(255, 255, 255, 0.6)'
+    },
+    accent: {
+      primary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      secondary: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      tertiary: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+    },
+    border: 'rgba(255, 255, 255, 0.1)'
+  };
 
   const cities = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune'];
   const categories = ['All', 'Concerts', 'Comedy Shows', 'Theatre', 'Sports', 'Workshops', 'Exhibitions'];
@@ -162,59 +194,132 @@ const Events: React.FC = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
-      {/* Header Section */}
-      <section style={{
-        backgroundColor: 'white',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        borderBottom: '1px solid #e5e7eb',
-        position: 'sticky',
+    <div style={{
+      minHeight: '100vh',
+      background: theme.bg.primary,
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Animated Background Elements */}
+      <div style={{
+        position: 'fixed',
         top: 0,
-        zIndex: 10
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: 0
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '16px 0'
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              width: '200px',
+              height: '200px',
+              borderRadius: '50%',
+              background: `linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))`,
+              animation: `float ${6 + i}s ease-in-out infinite`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              transform: `translate(-50%, -50%)`,
+              filter: 'blur(40px)'
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Fixed Header */}
+      <header style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        background: isScrolled ? theme.bg.secondary : 'transparent',
+        backdropFilter: isScrolled ? 'blur(20px)' : 'none',
+        borderBottom: isScrolled ? `1px solid ${theme.border}` : 'none',
+        transition: 'all 0.3s ease',
+        padding: '16px 0'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Link to="/" style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            background: theme.accent.primary,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textDecoration: 'none'
           }}>
-            {/* Logo/Back */}
-            <Link to="/" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              textDecoration: 'none',
-              color: '#dc2626',
-              fontWeight: 'bold',
-              fontSize: '18px'
-            }}>
-              ← PopcornGo
-            </Link>
+            PopcornGo
+          </Link>
+          
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <Link to="/" style={{ color: theme.text.secondary, textDecoration: 'none', transition: 'color 0.3s ease' }}>Home</Link>
+            <Link to="/movies" style={{ color: theme.text.secondary, textDecoration: 'none', transition: 'color 0.3s ease' }}>Movies</Link>
+            <Link to="/events" style={{ color: theme.text.primary, textDecoration: 'none', fontWeight: 'bold' }}>Events</Link>
             
-            {/* City Selector */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#6b7280', fontSize: '14px' }}>📍</span>
-              <select
-                value={selectedCity}
-                onChange={e => setSelectedCity(e.target.value)}
-                style={{
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                {cities.map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              style={{
+                padding: '8px',
+                border: 'none',
+                borderRadius: '8px',
+                background: theme.bg.glass,
+                color: theme.text.primary,
+                cursor: 'pointer',
+                fontSize: '20px',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
+          </nav>
         </div>
-      </section>
+      </header>
+
+      {/* Main Content */}
+      <div style={{
+        paddingTop: '100px',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 24px'
+        }}>
+          {/* Page Header */}
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '48px'
+          }}>
+            <h1 style={{
+              fontSize: '48px',
+              fontWeight: 'bold',
+              background: theme.accent.secondary,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              marginBottom: '16px'
+            }}>
+              Events in {selectedCity}
+            </h1>
+            <p style={{
+              fontSize: '18px',
+              color: theme.text.muted,
+              maxWidth: '600px',
+              margin: '0 auto'
+            }}>
+              Discover amazing events happening in your city
+            </p>
+          </div>
 
       {/* Page Title & Search */}
       <section style={{ padding: '32px 0', backgroundColor: 'white' }}>

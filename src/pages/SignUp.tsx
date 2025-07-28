@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const SignUp: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -15,6 +16,38 @@ const SignUp: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Dark mode theme colors
+  const theme = {
+    bg: {
+      primary: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f0f23 100%)',
+      secondary: 'rgba(15, 15, 35, 0.95)',
+      glass: 'rgba(255, 255, 255, 0.05)',
+      card: 'rgba(255, 255, 255, 0.08)',
+      hover: 'rgba(255, 255, 255, 0.12)'
+    },
+    text: {
+      primary: '#ffffff',
+      secondary: 'rgba(255, 255, 255, 0.8)',
+      muted: 'rgba(255, 255, 255, 0.6)'
+    },
+    accent: {
+      primary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      secondary: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      tertiary: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+    },
+    border: 'rgba(255, 255, 255, 0.1)'
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -42,29 +75,23 @@ const SignUp: React.FC = () => {
       newErrors.lastName = 'Last name is required';
     }
     
-    if (!formData.email) {
+    if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = 'Email is invalid';
     }
     
-    if (!formData.phone) {
+    if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) {
-      newErrors.phone = 'Please enter a valid 10-digit phone number';
     }
     
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters';
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Password must contain uppercase, lowercase, and number';
     }
     
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
     
@@ -86,54 +113,177 @@ const SignUp: React.FC = () => {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      // Redirect to sign in or home
-      window.location.href = '/signin';
+      navigate('/signin');
     }, 2000);
   };
 
-  const handleSocialSignUp = (provider: string) => {
-    console.log(`Sign up with ${provider}`);
-    // Implement social sign up logic
+  const inputStyle = {
+    width: '100%',
+    padding: '14px 16px',
+    border: `1px solid ${theme.border}`,
+    borderRadius: '12px',
+    fontSize: '16px',
+    outline: 'none',
+    transition: 'all 0.3s ease',
+    background: theme.bg.card,
+    color: theme.text.primary,
+    boxSizing: 'border-box' as const
+  };
+
+  const buttonStyle = {
+    width: '100%',
+    padding: '16px',
+    background: theme.accent.secondary,
+    border: 'none',
+    borderRadius: '12px',
+    color: '#ffffff',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    opacity: isLoading ? 0.7 : 1
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-      <div style={{ width: '100%', maxWidth: '480px' }}>
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <Link to="/" style={{ textDecoration: 'none' }}>
+    <div style={{
+      minHeight: '100vh',
+      background: theme.bg.primary,
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Animated Background Elements */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: 0
+      }}>
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              width: '250px',
+              height: '250px',
+              borderRadius: '50%',
+              background: `linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))`,
+              animation: `float ${6 + i * 2}s ease-in-out infinite`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              transform: `translate(-50%, -50%)`,
+              filter: 'blur(50px)'
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Fixed Header */}
+      <header style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        background: isScrolled ? theme.bg.secondary : 'transparent',
+        backdropFilter: isScrolled ? 'blur(20px)' : 'none',
+        borderBottom: isScrolled ? `1px solid ${theme.border}` : 'none',
+        transition: 'all 0.3s ease',
+        padding: '16px 0'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Link to="/" style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            background: theme.accent.primary,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textDecoration: 'none'
+          }}>
+            PopcornGo
+          </Link>
+          
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <Link to="/" style={{ color: theme.text.secondary, textDecoration: 'none', transition: 'color 0.3s ease' }}>Home</Link>
+            <Link to="/movies" style={{ color: theme.text.secondary, textDecoration: 'none', transition: 'color 0.3s ease' }}>Movies</Link>
+            <Link to="/events" style={{ color: theme.text.secondary, textDecoration: 'none', transition: 'color 0.3s ease' }}>Events</Link>
+            
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              style={{
+                padding: '8px',
+                border: 'none',
+                borderRadius: '8px',
+                background: theme.bg.glass,
+                color: theme.text.primary,
+                cursor: 'pointer',
+                fontSize: '20px',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        padding: '120px 24px 40px',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <div style={{
+          width: '100%',
+          maxWidth: '500px',
+          background: theme.bg.card,
+          backdropFilter: 'blur(20px)',
+          borderRadius: '24px',
+          border: `1px solid ${theme.border}`,
+          padding: '40px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+        }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
             <h1 style={{
               fontSize: '32px',
               fontWeight: 'bold',
-              color: '#dc2626',
+              background: theme.accent.secondary,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
               marginBottom: '8px'
             }}>
-              PopcornGo
+              Create Account
             </h1>
-          </Link>
-          <p style={{ fontSize: '16px', color: '#6b7280' }}>
-            Create your account
-          </p>
-        </div>
+            <p style={{ fontSize: '16px', color: theme.text.muted }}>
+              Join PopcornGo and start your movie journey
+            </p>
+          </div>
 
-        {/* Sign Up Form */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '32px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-          border: '1px solid #e5e7eb'
-        }}>
+          {/* Sign Up Form */}
           <form onSubmit={handleSubmit}>
             {/* Name Fields */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-              <div>
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ flex: 1 }}>
                 <label style={{
                   display: 'block',
                   fontSize: '14px',
                   fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
+                  color: theme.text.primary,
+                  marginBottom: '8px'
                 }}>
                   First Name
                 </label>
@@ -142,44 +292,28 @@ const SignUp: React.FC = () => {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  placeholder="First name"
+                  placeholder="Enter your first name"
                   style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: errors.firstName ? '2px solid #ef4444' : '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '16px',
-                    outline: 'none',
-                    transition: 'border-color 0.2s',
-                    backgroundColor: '#fafafa'
-                  }}
-                  onFocus={e => {
-                    if (!errors.firstName) {
-                      e.target.style.borderColor = '#dc2626';
-                      e.target.style.backgroundColor = 'white';
-                    }
-                  }}
-                  onBlur={e => {
-                    if (!errors.firstName) {
-                      e.target.style.borderColor = '#d1d5db';
-                      e.target.style.backgroundColor = '#fafafa';
-                    }
+                    ...inputStyle,
+                    border: errors.firstName ? `2px solid #ef4444` : `1px solid ${theme.border}`
                   }}
                 />
                 {errors.firstName && (
-                  <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
-                    {errors.firstName}
-                  </p>
+                  <p style={{ 
+                    fontSize: '12px', 
+                    color: '#ef4444', 
+                    marginTop: '6px',
+                    margin: '6px 0 0 0'
+                  }}>{errors.firstName}</p>
                 )}
               </div>
-
-              <div>
+              <div style={{ flex: 1 }}>
                 <label style={{
                   display: 'block',
                   fontSize: '14px',
                   fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
+                  color: theme.text.primary,
+                  marginBottom: '8px'
                 }}>
                   Last Name
                 </label>
@@ -188,46 +322,31 @@ const SignUp: React.FC = () => {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  placeholder="Last name"
+                  placeholder="Enter your last name"
                   style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: errors.lastName ? '2px solid #ef4444' : '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '16px',
-                    outline: 'none',
-                    transition: 'border-color 0.2s',
-                    backgroundColor: '#fafafa'
-                  }}
-                  onFocus={e => {
-                    if (!errors.lastName) {
-                      e.target.style.borderColor = '#dc2626';
-                      e.target.style.backgroundColor = 'white';
-                    }
-                  }}
-                  onBlur={e => {
-                    if (!errors.lastName) {
-                      e.target.style.borderColor = '#d1d5db';
-                      e.target.style.backgroundColor = '#fafafa';
-                    }
+                    ...inputStyle,
+                    border: errors.lastName ? `2px solid #ef4444` : `1px solid ${theme.border}`
                   }}
                 />
                 {errors.lastName && (
-                  <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
-                    {errors.lastName}
-                  </p>
+                  <p style={{ 
+                    fontSize: '12px', 
+                    color: '#ef4444', 
+                    marginTop: '6px',
+                    margin: '6px 0 0 0'
+                  }}>{errors.lastName}</p>
                 )}
               </div>
             </div>
 
-            {/* Email Field */}
-            <div style={{ marginBottom: '20px' }}>
+            {/* Email */}
+            <div style={{ marginBottom: '24px' }}>
               <label style={{
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
+                color: theme.text.primary,
+                marginBottom: '8px'
               }}>
                 Email Address
               </label>
@@ -238,43 +357,28 @@ const SignUp: React.FC = () => {
                 onChange={handleInputChange}
                 placeholder="Enter your email"
                 style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: errors.email ? '2px solid #ef4444' : '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  backgroundColor: '#fafafa'
-                }}
-                onFocus={e => {
-                  if (!errors.email) {
-                    e.target.style.borderColor = '#dc2626';
-                    e.target.style.backgroundColor = 'white';
-                  }
-                }}
-                onBlur={e => {
-                  if (!errors.email) {
-                    e.target.style.borderColor = '#d1d5db';
-                    e.target.style.backgroundColor = '#fafafa';
-                  }
+                  ...inputStyle,
+                  border: errors.email ? `2px solid #ef4444` : `1px solid ${theme.border}`
                 }}
               />
               {errors.email && (
-                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
-                  {errors.email}
-                </p>
+                <p style={{ 
+                  fontSize: '12px', 
+                  color: '#ef4444', 
+                  marginTop: '6px',
+                  margin: '6px 0 0 0'
+                }}>{errors.email}</p>
               )}
             </div>
 
-            {/* Phone Field */}
-            <div style={{ marginBottom: '20px' }}>
+            {/* Phone */}
+            <div style={{ marginBottom: '24px' }}>
               <label style={{
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
+                color: theme.text.primary,
+                marginBottom: '8px'
               }}>
                 Phone Number
               </label>
@@ -285,44 +389,29 @@ const SignUp: React.FC = () => {
                 onChange={handleInputChange}
                 placeholder="Enter your phone number"
                 style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: errors.phone ? '2px solid #ef4444' : '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  backgroundColor: '#fafafa'
-                }}
-                onFocus={e => {
-                  if (!errors.phone) {
-                    e.target.style.borderColor = '#dc2626';
-                    e.target.style.backgroundColor = 'white';
-                  }
-                }}
-                onBlur={e => {
-                  if (!errors.phone) {
-                    e.target.style.borderColor = '#d1d5db';
-                    e.target.style.backgroundColor = '#fafafa';
-                  }
+                  ...inputStyle,
+                  border: errors.phone ? `2px solid #ef4444` : `1px solid ${theme.border}`
                 }}
               />
               {errors.phone && (
-                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
-                  {errors.phone}
-                </p>
+                <p style={{ 
+                  fontSize: '12px', 
+                  color: '#ef4444', 
+                  marginTop: '6px',
+                  margin: '6px 0 0 0'
+                }}>{errors.phone}</p>
               )}
             </div>
 
             {/* Password Fields */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-              <div>
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ flex: 1 }}>
                 <label style={{
                   display: 'block',
                   fontSize: '14px',
                   fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
+                  color: theme.text.primary,
+                  marginBottom: '8px'
                 }}>
                   Password
                 </label>
@@ -334,26 +423,9 @@ const SignUp: React.FC = () => {
                     onChange={handleInputChange}
                     placeholder="Create password"
                     style={{
-                      width: '100%',
-                      padding: '12px 48px 12px 16px',
-                      border: errors.password ? '2px solid #ef4444' : '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      outline: 'none',
-                      transition: 'border-color 0.2s',
-                      backgroundColor: '#fafafa'
-                    }}
-                    onFocus={e => {
-                      if (!errors.password) {
-                        e.target.style.borderColor = '#dc2626';
-                        e.target.style.backgroundColor = 'white';
-                      }
-                    }}
-                    onBlur={e => {
-                      if (!errors.password) {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.backgroundColor = '#fafafa';
-                      }
+                      ...inputStyle,
+                      paddingRight: '50px',
+                      border: errors.password ? `2px solid #ef4444` : `1px solid ${theme.border}`
                     }}
                   />
                   <button
@@ -366,28 +438,33 @@ const SignUp: React.FC = () => {
                       transform: 'translateY(-50%)',
                       background: 'none',
                       border: 'none',
+                      color: theme.text.muted,
                       cursor: 'pointer',
                       fontSize: '18px',
-                      color: '#6b7280'
+                      padding: '4px',
+                      borderRadius: '4px',
+                      transition: 'color 0.3s ease'
                     }}
                   >
                     {showPassword ? '🙈' : '👁️'}
                   </button>
                 </div>
                 {errors.password && (
-                  <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
-                    {errors.password}
-                  </p>
+                  <p style={{ 
+                    fontSize: '12px', 
+                    color: '#ef4444', 
+                    marginTop: '6px',
+                    margin: '6px 0 0 0'
+                  }}>{errors.password}</p>
                 )}
               </div>
-
-              <div>
+              <div style={{ flex: 1 }}>
                 <label style={{
                   display: 'block',
                   fontSize: '14px',
                   fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
+                  color: theme.text.primary,
+                  marginBottom: '8px'
                 }}>
                   Confirm Password
                 </label>
@@ -399,26 +476,9 @@ const SignUp: React.FC = () => {
                     onChange={handleInputChange}
                     placeholder="Confirm password"
                     style={{
-                      width: '100%',
-                      padding: '12px 48px 12px 16px',
-                      border: errors.confirmPassword ? '2px solid #ef4444' : '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      outline: 'none',
-                      transition: 'border-color 0.2s',
-                      backgroundColor: '#fafafa'
-                    }}
-                    onFocus={e => {
-                      if (!errors.confirmPassword) {
-                        e.target.style.borderColor = '#dc2626';
-                        e.target.style.backgroundColor = 'white';
-                      }
-                    }}
-                    onBlur={e => {
-                      if (!errors.confirmPassword) {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.backgroundColor = '#fafafa';
-                      }
+                      ...inputStyle,
+                      paddingRight: '50px',
+                      border: errors.confirmPassword ? `2px solid #ef4444` : `1px solid ${theme.border}`
                     }}
                   />
                   <button
@@ -431,175 +491,70 @@ const SignUp: React.FC = () => {
                       transform: 'translateY(-50%)',
                       background: 'none',
                       border: 'none',
+                      color: theme.text.muted,
                       cursor: 'pointer',
                       fontSize: '18px',
-                      color: '#6b7280'
+                      padding: '4px',
+                      borderRadius: '4px',
+                      transition: 'color 0.3s ease'
                     }}
                   >
                     {showConfirmPassword ? '🙈' : '👁️'}
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
-                    {errors.confirmPassword}
-                  </p>
+                  <p style={{ 
+                    fontSize: '12px', 
+                    color: '#ef4444', 
+                    marginTop: '6px',
+                    margin: '6px 0 0 0'
+                  }}>{errors.confirmPassword}</p>
                 )}
               </div>
             </div>
 
-            {/* Terms Agreement */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'flex', alignItems: 'flex-start', fontSize: '14px', color: '#374151', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={agreedToTerms}
-                  onChange={e => setAgreedToTerms(e.target.checked)}
-                  style={{ marginRight: '8px', marginTop: '2px', accentColor: '#dc2626' }}
-                />
-                <span>
-                  I agree to PopcornGo's{' '}
-                  <Link to="/terms" style={{ color: '#dc2626', textDecoration: 'none', fontWeight: '500' }}>
-                    Terms of Service
-                  </Link>
-                  {' '}and{' '}
-                  <Link to="/privacy" style={{ color: '#dc2626', textDecoration: 'none', fontWeight: '500' }}>
-                    Privacy Policy
-                  </Link>
-                </span>
+            {/* Terms and Conditions */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+              <input
+                type="checkbox"
+                id="terms"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                style={{ marginTop: '4px' }}
+              />
+              <label htmlFor="terms" style={{ fontSize: '14px', color: theme.text.secondary, lineHeight: '1.5' }}>
+                I agree to PopcornGo's{' '}
+                <Link to="/terms" style={{ color: '#f093fb', textDecoration: 'none' }}>
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link to="/privacy" style={{ color: '#f093fb', textDecoration: 'none' }}>
+                  Privacy Policy
+                </Link>
               </label>
-              {errors.terms && (
-                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
-                  {errors.terms}
-                </p>
-              )}
             </div>
+            {errors.terms && (
+              <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '-16px' }}>{errors.terms}</p>
+            )}
 
-            {/* Sign Up Button */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '14px',
-                backgroundColor: isLoading ? '#9ca3af' : '#dc2626',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s',
-                marginBottom: '20px'
-              }}
-              onMouseEnter={e => {
-                if (!isLoading) {
-                  e.currentTarget.style.backgroundColor = '#b91c1c';
-                }
-              }}
-              onMouseLeave={e => {
-                if (!isLoading) {
-                  e.currentTarget.style.backgroundColor = '#dc2626';
-                }
-              }}
+              style={buttonStyle}
             >
-              {isLoading ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  <div style={{
-                    width: '16px',
-                    height: '16px',
-                    border: '2px solid #ffffff',
-                    borderTop: '2px solid transparent',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
-                  }}></div>
-                  Creating Account...
-                </div>
-              ) : (
-                'Create Account'
-              )}
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
-
-            {/* Divider */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: '20px'
-            }}>
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
-              <span style={{ padding: '0 16px', fontSize: '14px', color: '#6b7280' }}>or</span>
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#e5e7eb' }}></div>
-            </div>
-
-            {/* Social Sign Up Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-              <button
-                type="button"
-                onClick={() => handleSocialSignUp('google')}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: 'white',
-                  color: '#374151',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = '#f9fafb';
-                  e.currentTarget.style.borderColor = '#9ca3af';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = 'white';
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                }}
-              >
-                <span style={{ fontSize: '18px' }}>🔍</span>
-                Sign up with Google
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSocialSignUp('facebook')}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: '#1877f2',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#166fe5'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#1877f2'}
-              >
-                <span style={{ fontSize: '18px' }}>📘</span>
-                Sign up with Facebook
-              </button>
-            </div>
           </form>
 
           {/* Sign In Link */}
-          <div style={{ textAlign: 'center', paddingTop: '20px', borderTop: '1px solid #e5e7eb' }}>
-            <p style={{ fontSize: '14px', color: '#6b7280' }}>
+          <div style={{ textAlign: 'center', marginTop: '24px' }}>
+            <p style={{ color: theme.text.muted, fontSize: '14px' }}>
               Already have an account?{' '}
               <Link
                 to="/signin"
                 style={{
-                  color: '#dc2626',
+                  color: '#f093fb',
                   textDecoration: 'none',
                   fontWeight: '600'
                 }}
@@ -609,20 +564,23 @@ const SignUp: React.FC = () => {
             </p>
           </div>
         </div>
-
-        {/* Footer */}
-        <div style={{ textAlign: 'center', marginTop: '24px' }}>
-          <p style={{ fontSize: '12px', color: '#9ca3af' }}>
-            By creating an account, you agree to receive promotional emails and updates from PopcornGo.
-          </p>
-        </div>
       </div>
 
       {/* CSS Animation */}
       <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        @keyframes float {
+          0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
+          50% { transform: translate(-50%, -50%) translateY(-20px); }
+        }
+        
+        input:focus {
+          border-color: rgba(240, 147, 251, 0.5) !important;
+          box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.1) !important;
+        }
+        
+        button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 25px rgba(240, 147, 251, 0.2);
         }
       `}</style>
     </div>

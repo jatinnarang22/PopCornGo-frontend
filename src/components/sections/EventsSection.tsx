@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import EventCard, { EventCardProps } from '../cards/EventCard';
+import EventCard, { type EventCardProps } from '../cards/EventCard';
 
 interface EventsSectionProps {
   events: EventCardProps[];

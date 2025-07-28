@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "../pages/Home";
 import Movies from "../pages/Movies";
-import Events from "../pages/Events";
+import Events from "../pages/Events_new";
 import Booking from "../pages/Booking";
 import Profile from "../pages/Profile";
 import SignIn from "../pages/SignIn";
